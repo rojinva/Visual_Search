@@ -1,0 +1,9 @@
+.spyderproject
+*.swp
+*.pyc
+derby.log
+src/pattern_images/**
+src/solid_images/**
+src/label_solid/**
+src/label_pattern/**
+.DS_Store

@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <script src="/static/jquery-1.10.1.min.js"></script>
+    <script src="/static/jquery-ui.js"></script>
+    <script src="/static/jquery.min.js"></script>
+    <script type="text/javascript">
+
+function add_row(data, prj_name, id, message) {
+    if (data.length > 0) {
+    $("#pane").append("<span class='msg2'>"+message+"</span>");
+    $("#pane").append("<ul id ="+id+" class='similar_products'>");
+    for (idx in data){
+        $("#"+id).append("<li><img src=/static/images_"+prj_name+"/"+data[idx].image_url+" height='170px' width='170px' onclick='return show_similar("+data[idx].sku+")'><span>sim_score: "+data[idx].sim_score+"</span></li>");
+    }  
+    }
+}
+
+function show_similar(sku){
+$("#pane").remove();
+$("#container").append("<div id='pane'></div>");
+$("#pane").append("<img src=/static/ajax-loader.gif height='60px' width='60px'>");
+var request = $.ajax({
+       type: "GET",
+       url: "show_similar",
+       data: "sku="+sku
+     });
+
+request.done(function( results ) {
+    data1 = results.data1;
+    data2 = results.data2;
+    data3 = results.data3;
+    data4 = results.data4;
+    data5 = results.data5;
+    prj_name = results.prj_name;
+    $("#pane").remove();
+    $("#container").append("<div id='pane'></div>");
+    $("#pane").append("<a href='#' id='close' onclick='return close_pane()'>close</a>");
+    add_row(data1, prj_name, "s1", "Histogram Similarity");
+    add_row(data2, prj_name, "s2", "Shape Similarity");
+    add_row(data3, prj_name, "s3", "Gabor Similarity");
+    add_row(data4, prj_name, "s4", "LBP Similarity" );
+    add_row(data5, prj_name, "s5", "Gabor + LBP  Similarity" );
+});
+
+}
+
+function close_pane(){
+$("#pane").remove();
+}
+
+function label(sku,type){
+var request = $.ajax({
+    type: "GET",
+    url: "label",
+    data: "sku="+sku+"&l="+type
+    });
+}
+function show_debug(sku){
+var request = $.ajax({
+       type: "GET",
+       url: "show_debug",
+       data: "sku="+sku
+     });
+
+request.done(function( results ) {
+    data = results.data;
+    $("#pane").remove();
+    $("#container").append("<div id='pane' width='1600px' height='700px'></div>");
+    $("#pane").append("<div id='close-container'> <span class='close-btn' onclick='close_pane()'>X</span></div>");
+    $("#pane").append("<ul id ='similar' class='similar_products'>");
+    if (data.length == 0){
+        $("#similar").append("<li>No similar products found</li>");
+    }
+    for (idx in data){
+    $("#similar").append("<li><img src=/static/temp/"+ data[idx].fname +" height='200px' width='200px'><span>score: "+data[idx].sim_score+"</span></li>");
+    }
+
+});
+}
+
+
+
+
+</script>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Visual Search</title>
+<link rel="stylesheet" type="text/css" href="/static/class.css" media="screen" />
+</head>
+<body>
+<div id="header" class="right">
+</div>
+<div id="container">
+    </div>
+    <br>
+    <ul class="products">
+    {% for result in results %}
+    <li>
+    <img src="/static/images_{{prj_name_}}/{{result.image_url}}" height="200px" width="200px" onclick="return show_similar({{result.sku}})">
+    <button onclick="return show_debug({{result.sku}})">debug</button>
+    </li>
+    {% endfor %}
+    <div class="spacer"></div>
+</div>
+</body>
+</html>
